@@ -152,6 +152,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
                 .update();
         return Result.success(Ur);
     }
+    @Override
+    public Result<Void> deleteUser(int id){
+        UserEntity user = getById(id);
+        if (user != null) {
+            removeById(id);
+            return Result.success();
+        }
+        return Result.error(400,"用户不存在");
+    }
 
 
 }

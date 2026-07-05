@@ -81,14 +81,10 @@ public class UserController {
     ) {
         return userService.ResetPassword(Ur);
     }
-
-    @DeleteMapping("/{id}")
-    public Result<UserEntity> deleteUser(@PathVariable int id) {
-        UserEntity user = userService.getById(id);
-        if (user != null) {
-            userService.removeById(id);
-        }
-        return user != null ? Result.success() : Result.error(404, "用户不存在");
+    //删除账户接口
+    @DeleteMapping("/delete/{id}")
+    public Result<Void> deleteUser(@PathVariable int id) {
+        return  userService.deleteUser(id);
     }
 
 

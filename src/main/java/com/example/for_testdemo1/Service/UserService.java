@@ -32,5 +32,6 @@ public interface UserService extends IService<UserEntity> {
     Result<List<UserDto>> userSearch(String anyKeyword);
     //用户重置密码接口
     Result<UserReset> ResetPassword(UserReset Ur);
-
+    //删除账户接口
+    Result<Void> deleteUser(int id);
 }
