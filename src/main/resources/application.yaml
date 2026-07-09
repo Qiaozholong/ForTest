@@ -8,3 +8,6 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 server:
   port: 70
+jwt:
+  secret-key: you-need-a-key-at-least-256-bits-long-here-xxxyou-need-a-key-at-least-256-bits-long-here-xxxyou-need-a-key-at-least-256-bits-long-here-xxxyou-need-a-key-at-least-256-bits-long-here-xxxyou-need-a-key-at-least-256-bits-long-here-xxxyou-need-a-key-at-least-256-bits-long-here-xxxyou-need-a-key-at-least-256-bits-long-here-xxx
+  expiration: 604800000

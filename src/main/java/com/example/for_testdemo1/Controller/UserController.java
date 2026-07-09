@@ -1,20 +1,22 @@
 package com.example.for_testdemo1.Controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.for_testdemo1.Common.BusinessException;
 import com.example.for_testdemo1.Common.Result;
+import com.example.for_testdemo1.Dto.LoginDto;
 import com.example.for_testdemo1.Dto.UserDto;
-import com.example.for_testdemo1.Dto.UserRegisterDto;
-import com.example.for_testdemo1.Dto.UserReset;
+import com.example.for_testdemo1.Dto.RegisterDto;
+import com.example.for_testdemo1.Dto.UserResetDto;
 import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Service.UserService;
+import com.example.for_testdemo1.Vo.LoginResultVo;
 import com.example.for_testdemo1.Vo.UserDetailVo;
-import com.example.for_testdemo1.Vo.UserLoginVo;
 import com.example.for_testdemo1.Vo.UserVo;
-import org.springframework.beans.BeanUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -28,14 +30,14 @@ public class UserController {
 
     //注册接口
     @PostMapping("/register")
-    public Result<UserRegisterDto> userregister(@RequestBody UserRegisterDto dto) {
+    public Result<LoginResultVo> userregister(@Valid @RequestBody RegisterDto dto) {
         return userService.userRegister(dto);
     }
 
     //登录接口
     @PostMapping("/login")
-    public Result<UserLoginVo> UserLoginVo(@RequestBody UserLoginVo vo) {
-        return userService.userLogin(vo);
+    public Result<LoginResultVo> UserLoginVo(@Valid@RequestBody LoginDto dto) {
+        return userService.userLogin(dto);
     }
 
     //简要查询接口
@@ -46,13 +48,21 @@ public class UserController {
 
     //单独查询用户简要信息接口
     @GetMapping("/{id}")
-    public Result<UserVo> getUserInfo(@PathVariable int id) {
+    public Result<UserVo> getUserInfo(@PathVariable int id, HttpServletRequest request) {
+        int userId = (int) request.getAttribute("userId");
+        if (id != userId) {
+            throw new BusinessException(403,"无权访问该数据信息");
+        }
         return userService.userInfo(id);
     }
 
     //单独查询用户详细信息接口
     @GetMapping("/get/{id}")
-    public Result<UserEntity> getUserAllInfo(@PathVariable int id) {
+    public Result<UserEntity> getUserAllInfo(@PathVariable int id, HttpServletRequest request) {
+        int userId = (int) request.getAttribute("userId");
+        if (id != userId) {
+            throw new BusinessException(403,"无权访问该数据信息");
+        }
         return userService.userAllInfo(id);
     }
 
@@ -76,15 +86,28 @@ public class UserController {
 
     //重置密码接口
     @PatchMapping("/reset/{id}")
-    public Result<UserReset> resetPassword(
-            @RequestBody UserReset Ur
+    public Result<UserResetDto> resetPassword(
+            @Valid @RequestBody UserResetDto Ur,
+            @PathVariable int id,
+            HttpServletRequest request
     ) {
+        int  userId = (int) request.getAttribute("userId");
+        if ( id!= userId) {
+            throw new BusinessException(403,"无权访问该数据信息");
+        }
         return userService.ResetPassword(Ur);
     }
+
     //删除账户接口
     @DeleteMapping("/delete/{id}")
-    public Result<Void> deleteUser(@PathVariable int id) {
-        return  userService.deleteUser(id);
+    public Result<Void> deleteUser(
+            @PathVariable int id,
+            HttpServletRequest request) {
+        int userId = (int) request.getAttribute("userId");
+        if (id != userId) {
+            throw new BusinessException(403,"无权访问该数据信息");
+        }
+        return userService.deleteUser(id);
     }
 
 

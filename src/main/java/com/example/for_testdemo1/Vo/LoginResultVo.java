@@ -3,7 +3,9 @@ package com.example.for_testdemo1.Vo;
 import lombok.Data;
 
 @Data
-public class UserLoginVo {
+public class LoginResultVo {
+
+    private int id;
     private String account;
-    private String password;
+    private String token;
 }
