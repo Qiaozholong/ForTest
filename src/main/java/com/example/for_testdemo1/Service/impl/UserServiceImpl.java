@@ -36,7 +36,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     public Result<LoginResultVo> userRegister(RegisterDto dto) {
         UserEntity exist = lambdaQuery().eq(UserEntity::getAccount, dto.getAccount()).one();
         if (exist != null) {
-            throw new BusinessException(400,"账号已存在");
+            throw new BusinessException(400, "账号已存在");
         }
         UserEntity user = new UserEntity();
         BeanUtils.copyProperties(dto, user);
@@ -44,7 +44,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         save(user);
         LoginResultVo result = new LoginResultVo();
         BeanUtils.copyProperties(user, result);
-        String token = jwtUtil.generateToken(user.getId(),user.getAccount());
+        String token = jwtUtil.generateToken(user.getId(), user.getAccount(),user.getRole());
         result.setToken(token);
         return Result.success(result);
     }
@@ -53,12 +53,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     public Result<LoginResultVo> userLogin(LoginDto dto) {
         UserEntity user = lambdaQuery().eq(UserEntity::getAccount, dto.getAccount()).one();
         if (user == null) {
-            throw new BusinessException(401,"账号或密码错误");
+            throw new BusinessException(401, "账号或密码错误");
         }
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new BusinessException(401,"账号或密码错误");
+            throw new BusinessException(401, "账号或密码错误");
         }
-        String token = jwtUtil.generateToken(user.getId(), user.getAccount());
+        String token = jwtUtil.generateToken(user.getId(), user.getAccount(),user.getRole());
         LoginResultVo vo = new LoginResultVo();
         BeanUtils.copyProperties(user, vo);
         vo.setToken(token);

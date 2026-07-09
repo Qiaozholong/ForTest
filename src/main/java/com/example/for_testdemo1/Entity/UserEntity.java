@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class UserEntity {
     @TableId(type = IdType.AUTO)
     private int id;
+    private short role;
     private String account;
     private String password;
     private String name;

@@ -50,8 +50,11 @@ public class UserController {
     @GetMapping("/{id}")
     public Result<UserVo> getUserInfo(@PathVariable int id, HttpServletRequest request) {
         int userId = (int) request.getAttribute("userId");
-        if (id != userId) {
-            throw new BusinessException(403,"无权访问该数据信息");
+        int role = (int) request.getAttribute("role");
+        if (role != 1) {
+            if (id != userId) {
+                throw new BusinessException(403,"无权访问该数据信息");
+            }
         }
         return userService.userInfo(id);
     }
@@ -60,8 +63,11 @@ public class UserController {
     @GetMapping("/get/{id}")
     public Result<UserEntity> getUserAllInfo(@PathVariable int id, HttpServletRequest request) {
         int userId = (int) request.getAttribute("userId");
-        if (id != userId) {
-            throw new BusinessException(403,"无权访问该数据信息");
+        int role = (int) request.getAttribute("role");
+        if (role != 1) {
+            if (id != userId) {
+                throw new BusinessException(403,"无权访问该数据信息");
+            }
         }
         return userService.userAllInfo(id);
     }

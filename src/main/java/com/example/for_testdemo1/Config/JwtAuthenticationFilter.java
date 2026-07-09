@@ -42,9 +42,12 @@ public class JwtAuthenticationFilter implements Filter {
             return;
         }
         int userId = jwtUtil.extractUserId(token);
+        int role = jwtUtil.extractRole(token);
         req.setAttribute("userId", userId);
+        req.setAttribute("role", role);
         chain.doFilter(request, response);
     }
+
 
     private void send401(HttpServletResponse res, String msg)
             throws IOException {

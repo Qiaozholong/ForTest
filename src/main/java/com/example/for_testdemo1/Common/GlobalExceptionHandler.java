@@ -20,7 +20,5 @@ public class GlobalExceptionHandler {
                 .map(err -> err.getField() +":"+ err.getDefaultMessage())
                 .collect(Collectors.joining(","));
         return Result.error(400, msg);
-
-
     }
 }
