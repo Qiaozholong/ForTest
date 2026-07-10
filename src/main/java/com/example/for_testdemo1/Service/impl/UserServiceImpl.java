@@ -9,6 +9,7 @@ import com.example.for_testdemo1.Dto.*;
 import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Mapper.UserMapper;
 import com.example.for_testdemo1.Service.UserService;
+import com.example.for_testdemo1.Util.ForUser;
 import com.example.for_testdemo1.Vo.LoginResultVo;
 import com.example.for_testdemo1.Vo.UserDetailVo;
 import com.example.for_testdemo1.Vo.UserVo;
@@ -20,10 +21,16 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserService {
+    Map<String, String> FIELD_CN = Map.of(
+            "email", "邮箱",
+            "gender", "性别",
+            "name", "用户名"
+    );
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
@@ -52,10 +59,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     public Result<LoginResultVo> userLogin(LoginDto dto) {
         UserEntity user = lambdaQuery().eq(UserEntity::getAccount, dto.getAccount()).one();
-        if (user == null) {
-            throw new BusinessException(401, "账号或密码错误");
-        }
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        if (user == null && !passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new BusinessException(401, "账号或密码错误");
         }
         String token = jwtUtil.generateToken(user.getId(), user.getAccount(), user.getRole());
@@ -79,12 +83,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     public Result<List<UserVo>> userInfo() {
         List<UserEntity> Ue = list();
-        List<UserVo> vo = Ue.stream()
-                .map(element -> {
-                    UserVo v = new UserVo();
-                    BeanUtils.copyProperties(element, v);
-                    return v;
-                }).collect(Collectors.toList());
+        List<UserVo> vo = ForUser.convertList(Ue, UserVo.class);
         return Result.success(vo);
     }
 
@@ -101,12 +100,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     public Result<List<UserDetailVo>> userAllInfo() {
         List<UserEntity> Ue = list();
-        List<UserDetailVo> vo = Ue.stream()
-                .map(element -> {
-                    UserDetailVo v = new UserDetailVo();
-                    BeanUtils.copyProperties(element, v);
-                    return v;
-                }).collect(Collectors.toList());
+        List<UserDetailVo> vo = ForUser.convertList(Ue, UserDetailVo.class);
         return Result.success(vo);
     }
 
@@ -141,11 +135,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     @Override
     public Result<UserResetDto> ResetPassword(UserResetDto Ur) {
         UserEntity user = lambdaQuery().eq(UserEntity::getAccount, Ur.getAccount()).one();
-        if (user == null) {
-            throw new BusinessException(402, "用户不存在");
-        }
-        if (!passwordEncoder.matches(Ur.getPassword(), user.getPassword())) {
-            throw new BusinessException(403, "用户名或密码错误");
+        if (user == null && !passwordEncoder.matches(Ur.getPassword(), user.getPassword())) {
+            throw new BusinessException(402, "用户名或密码错误");
         }
         String encodePwd = passwordEncoder.encode(Ur.getNewone());
         lambdaUpdate()
@@ -164,34 +155,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         }
         throw new BusinessException(400, "用户不存在");
     }
+
     @Override
     public String getDetail(int id) {
         UserEntity user = getById(id);
         if (user == null) {
-            throw new BusinessException(401,"用户不存在");
+            throw new BusinessException(401, "用户不存在");
         }
-        List<String> nullFields=new ArrayList<>();
-        for (Field field:UserEntity.class.getDeclaredFields()){
+        List<String> nullFields = new ArrayList<>();
+        for (Field field : UserEntity.class.getDeclaredFields()) {
             field.setAccessible(true);
-            try{
-                Object value=field.get(user);
-                if (value==null){
+            try {
+                Object value = field.get(user);
+                if (value == null) {
                     nullFields.add(field.getName());
                 }
-            }catch (IllegalAccessException e){
-                throw new BusinessException(402,"字段访问异常");
+            } catch (IllegalAccessException e) {
+                throw new BusinessException(402, "字段访问异常");
             }
         }
         if (nullFields.isEmpty()) {
             return "信息完整";
         }
         return nullFields.stream()
-                .map(e->e+"未设置")
-                .collect(Collectors.joining(","));
+                .map(e -> FIELD_CN.getOrDefault(e, e)+ "未设置")
+                .collect(Collectors.joining(",\n"));
     }
 
     @Override
-    public void setDetail(PatchDto dto,int id) {
+    public void setDetail(PatchDto dto, int id) {
         UserEntity user = getById(id);
         user.setEmail(dto.getEmail());
         user.setGender(dto.getGender());

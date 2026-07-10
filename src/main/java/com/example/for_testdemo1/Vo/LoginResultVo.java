@@ -8,4 +8,5 @@ public class LoginResultVo {
     private int id;
     private String account;
     private String token;
+    private int role;
 }

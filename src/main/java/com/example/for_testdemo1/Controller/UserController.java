@@ -6,6 +6,7 @@ import com.example.for_testdemo1.Common.Result;
 import com.example.for_testdemo1.Dto.*;
 import com.example.for_testdemo1.Entity.UserEntity;
 import com.example.for_testdemo1.Service.UserService;
+import com.example.for_testdemo1.Util.ForUser;
 import com.example.for_testdemo1.Vo.LoginResultVo;
 import com.example.for_testdemo1.Vo.UserDetailVo;
 import com.example.for_testdemo1.Vo.UserVo;
@@ -40,45 +41,28 @@ public class UserController {
     //简要查询接口
     @GetMapping("/getall")
     public Result<List<UserVo>> getAll(HttpServletRequest request) {
-        int role = (int) request.getAttribute("role");
-        if (role != 1) {
-            throw new BusinessException(403, "无权访问该数据信息");
-        }
+        ForUser.checkRole(request);
         return userService.userInfo();
     }
 
     //单独查询用户简要信息接口
     @GetMapping("/{id}")
     public Result<UserVo> getUserInfo(@PathVariable int id, HttpServletRequest request) {
-        int userId = (int) request.getAttribute("userId");
-        int role = (int) request.getAttribute("role");
-        if (role != 1) {
-            if (id != userId) {
-                throw new BusinessException(403, "无权访问该数据信息");
-            }
-        }
+        ForUser.checkPermission(request, id);
         return userService.userInfo(id);
     }
 
     //单独查询用户详细信息接口
     @GetMapping("/get/{id}")
     public Result<UserEntity> getUserAllInfo(@PathVariable int id, HttpServletRequest request) {
-        int userId = (int) request.getAttribute("userId");
-        int role = (int) request.getAttribute("role");
-        if (role != 1) {
-            if (id != userId) {
-                throw new BusinessException(403, "无权访问该数据信息");
-            }
-        }
+        ForUser.checkPermission(request, id);
         return userService.userAllInfo(id);
     }
 
     @GetMapping("/get")
     public Result<List<UserDetailVo>> getUserAllInfo(HttpServletRequest request) {
-        int role = (int) request.getAttribute("role");
-        if (role != 1) {
-            throw new BusinessException(403, "无权访问该数据信息");
-        }
+        ForUser.checkRole(request);
+
         return userService.userAllInfo();
     }
 
@@ -93,10 +77,7 @@ public class UserController {
     public Result<List<UserDto>> userSearch(
             @RequestParam String search,
             HttpServletRequest request) {
-        int userRole = (int) request.getAttribute("role");
-        if (userRole != 1) {
-            throw new BusinessException(403, "无权访问该数据信息");
-        }
+        ForUser.checkRole(request);
         return userService.userSearch(search);
     }
 
@@ -107,10 +88,7 @@ public class UserController {
             @PathVariable int id,
             HttpServletRequest request
     ) {
-        int userId = (int) request.getAttribute("userId");
-        if (id != userId) {
-            throw new BusinessException(403, "无权访问该数据信息");
-        }
+        ForUser.checkPermission(request, id);
         return userService.ResetPassword(Ur);
     }
 
@@ -119,35 +97,20 @@ public class UserController {
     public Result<Void> deleteUser(
             @PathVariable int id,
             HttpServletRequest request) {
-        int userId = (int) request.getAttribute("userId");
-        if (id != userId) {
-            throw new BusinessException(403, "无权访问该数据信息");
-        }
+        ForUser.checkPermission(request, id);
         return userService.deleteUser(id);
     }
 
     @GetMapping("/getDetail/{id}")
     public String getDetail(@PathVariable int id, HttpServletRequest request) {
-        int userId = (int) request.getAttribute("userId");
-        int userRole = (int) request.getAttribute("role");
-        if (userRole != 1) {
-            if (id != userId) {
-                throw new BusinessException(403, "无权访问该数据信息");
-            }
-        }
+        ForUser.checkPermission(request, id);
         return userService.getDetail(id);
     }
 
     @PatchMapping("/setDetail/{id}")
-    public Result<Void> setDetail(@Valid @RequestBody PatchDto dto,@PathVariable int id, HttpServletRequest request) {
-        int userId = (int) request.getAttribute("userId");
-        int userRole = (int) request.getAttribute("role");
-        if (userRole != 1) {
-            if (id != userId) {
-                throw new BusinessException(403, "无权访问该数据信息");
-            }
-        }
-        userService.setDetail(dto,id);
+    public Result<Void> setDetail(@Valid @RequestBody PatchDto dto, @PathVariable int id, HttpServletRequest request) {
+        ForUser.checkPermission(request, id);
+        userService.setDetail(dto, id);
         return Result.success();
     }
 

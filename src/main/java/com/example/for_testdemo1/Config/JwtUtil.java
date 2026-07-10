@@ -26,7 +26,7 @@ public class JwtUtil {
     }
 
 
-    public String generateToken(int userId, String account, short role) {
+    public String generateToken(int userId, String account, int role) {
         String token = Jwts.builder()
                 .claim("userId", userId)
                 .claim("account", account)
